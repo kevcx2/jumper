@@ -5,7 +5,7 @@ var gulp = require('gulp'),
   series = require('stream-series'),
   inject = require('gulp-inject');
 
-var vendorStream = gulp.src(['./vendor/js/*.js'], {read: false});
+var vendorStream = gulp.src(['./vendor/js/*'], {read: false});
 
 var appStream = gulp.src(['./src/js/*.js'], {read: false});
 
