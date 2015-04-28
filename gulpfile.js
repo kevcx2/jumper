@@ -1,17 +1,27 @@
 var gulp = require('gulp'),
   nodemon = require('gulp-nodemon'),
   livereload = require('gulp-livereload'),
-  sass = require('gulp-sass');
+  sass = require('gulp-sass'),
+  series = require('stream-series'),
+  inject = require('gulp-inject');
+
+var vendorStream = gulp.src(['./vendor/js/*.js'], {read: false});
+
+// var appStream = gulp.src(['./src/app/*.js'], {read: false});
+
+gulp.src('./views/index.ejs')
+  .pipe(inject(series(vendorStream), { ignorePath: 'vendor/'})) // This will always inject vendor files before app files
+  .pipe(gulp.dest('./views/'));
 
 gulp.task('sass', function () {
-  gulp.src('./public/css/*.scss')
+  gulp.src('./src/css/*.scss')
     .pipe(sass())
-    .pipe(gulp.dest('./public/css'))
+    .pipe(gulp.dest('./src/css'))
     .pipe(livereload());
 });
 
 gulp.task('watch', function() {
-  gulp.watch('./public/css/*.scss', ['sass']);
+  gulp.watch('./src/css/*.scss', ['sass']);
 });
 
 gulp.task('develop', function () {
