@@ -5,13 +5,16 @@ var game = new Phaser.Game(640, 480, Phaser.AUTO, 'game');
 var CurveTest = function () {
 
   this.bmd = null;
-  this.points = {
-      'x': [ 100, 200, 300],
-      'y': [ 200, 100, 200]
-  };
+  this.startX = 100;
+  this.startY = 200;
 
   this.jumpDistance = 0;
+  this.jumpHeight = 0;
+  this.jumpHeightStart = 0;
   this.jumpReady = false;
+
+  this.HEIGHT_SENSITIVITY = 1.2;
+  this.POINT_DENSITY = 100;
 };
 
 CurveTest.prototype = {
@@ -29,25 +32,25 @@ CurveTest.prototype = {
     this.bmd.addToWorld();
     game.input.onDown.add(this.adjustCurve, this);
     game.input.onUp.add(this.jump, this);
-    console.log('created');
   },
 
-  adjustCurve: function () {
+  adjustCurve: function (clickEvent) {
     this.jumpready = true;
+    this.jumpHeightStart = clickEvent.clientY;
+    console.log(this.jumpHeight);
   },
 
   jump: function () {
     this.jumpDistance = 0;
+    this.jumpHeight = 0;
+    this.jumpHeightStart = 0;
     this.jumpready = false;
   },
 
   plot: function (points) {
-
-    this.bmd.clear();
-
     this.path = [];
 
-    var x = 1 / 100;
+    var x = 1 / this.POINT_DENSITY;
 
     for (var i = 0; i <= 1; i += x)
     {
@@ -63,22 +66,26 @@ CurveTest.prototype = {
     {
         this.bmd.rect(points.x[p]-3, points.y[p]-3, 6, 6, 'rgba(255, 0, 0, 1)');
     }
-
   },
 
   update: function () {
+    this.bmd.clear();
+
     if (this.jumpready === true) {
       this.jumpDistance += 2;
-      console.log(this.jumpDistance);
+      this.jumpHeight = Math.abs(this.jumpHeightStart - game.input.y) * this.HEIGHT_SENSITIVITY;
     }
-    console.log('jumpdist: ' + this.jumpDistance);
     var jumpPoints = {
-        'x': [ 100, ((100 +  300 + this.jumpDistance)/2), 300 + this.jumpDistance],
-        'y': [ 200, 100, 200]
+      'x': [ this.startX, this.startX + this.jumpDistance/2, this.startX + this.jumpDistance],
+      'y': [ this.startY, this.startY - this.jumpHeight, this.startY]
     };
+    var mirrorJumpPoints = {
+      'x': [ this.startX, this.startX + this.jumpDistance/2, this.startX + this.jumpDistance],
+      'y': [ this.startY, this.startY + this.jumpHeight, this.startY]
+    };
+    this.plot(mirrorJumpPoints);
     this.plot(jumpPoints);
   }
-
 };
 
 game.state.add('Game', CurveTest, true);
