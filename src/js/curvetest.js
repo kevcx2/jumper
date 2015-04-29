@@ -28,7 +28,7 @@ CurveTest.prototype = {
   },
 
   create: function () {
-    this.bmd = this.add.bitmapData(this.game.width, this.game.height);
+    this.bmd = this.add.bitmapData(game.width, game.height);
     this.bmd.addToWorld();
     game.input.onDown.add(this.adjustCurve, this);
     game.input.onUp.add(this.jump, this);
