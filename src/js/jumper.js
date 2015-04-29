@@ -7,6 +7,7 @@ window.onload = function() {
   });
   var platforms;
   var circle;
+  var circleJumping = false;
 
   function preload () {
     game.load.image('circle', 'sprites/circle.png');
@@ -50,13 +51,35 @@ window.onload = function() {
   }
 
   function jump () {
+    circleJumping = true;
     circle.body.velocity.x = 200;
     game.input.onUp.remove(jump, this);
   }
 
+  function checkLanding (circle, platform){
+    if(platform.x <= circle.x + circle.width / 2 ){
+      var border = circle.y - platform.y;
+      if(Math.abs(border) > 20){
+        circle.body.velocity.y = border * 2;
+        circle.body.velocity.x = -200;
+      }
+      
+      if(circleJumping){
+        circleJumping = false;
+        game.input.onDown.add(prepareToJump, this);
+      }
+    }
+    // else{
+    //   ninjaFallingDown = true;
+    //   poleGroup.forEach(function(item) {
+    //     item.body.velocity.x = 0;
+    //   });
+    // }
+  }
+
 
   function update () {
-    game.physics.arcade.collide(circle, platforms);
+    game.physics.arcade.collide(circle, platforms, checkLanding);
   }
 
 };
