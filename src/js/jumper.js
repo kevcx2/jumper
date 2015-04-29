@@ -5,9 +5,36 @@ window.onload = function() {
     create: create,
     update: update
   });
+
+  var Player = function (game, playerSprite) {
+
+    Phaser.Sprite.call(this, game, game.width / 2 + 50, 300, playerSprite);
+
+    this.game = game;
+    this.jumping = false;
+  };
+
+  Player.prototype = Object.create(Phaser.Sprite.prototype, {
+
+    prepareToJump: {
+      value: function () {
+        this.game.input.onDown.remove(this.prepareToJump, this);
+        this.game.input.onUp.add(this.jump, this);
+      }
+    },
+
+    jump: {
+      value: function () {
+        this.jumping = true;
+        this.body.velocity.x = 200;
+        this.game.input.onUp.remove(this.jump, this);
+      }
+    }
+  });
+  Player.prototype.constructor = Player;
+
   var platforms;
   var circle;
-  var circleJumping = false;
 
   function preload () {
     game.load.image('circle', 'sprites/circle.png');
@@ -18,13 +45,16 @@ window.onload = function() {
   function create () {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    circle = game.add.sprite(game.width / 2 + 50, 300, 'circle');
+    circle = new Player(game, 'circle');
+    // circle = game.add.sprite(game.width / 2 + 50, 300, 'circle');
     circle.anchor.set(0.5);
     circle.enableBody = true;
     game.physics.arcade.enable(circle);
     circle.body.bounce.x = 0.2;
     circle.body.gravity.x = -300;
     circle.body.collideWorldBounds = true;
+
+    game.add.existing(circle);
 
     platforms = game.add.group();
     platforms.enableBody = true;
@@ -40,20 +70,9 @@ window.onload = function() {
     ledge.anchor.set(0.5, 0.5);
 
     // Set up handlers for mouse events
-    game.input.onDown.add(prepareToJump, this);
+    game.input.onDown.add(circle.prepareToJump, circle);
     // game.input.addMoveCallback(mouseDragMove, this);
 
-  }
-
-  function prepareToJump () {
-    game.input.onDown.remove(prepareToJump, this);
-    game.input.onUp.add(jump, this);  
-  }
-
-  function jump () {
-    circleJumping = true;
-    circle.body.velocity.x = 200;
-    game.input.onUp.remove(jump, this);
   }
 
   function checkLanding (circle, platform){
@@ -64,9 +83,9 @@ window.onload = function() {
         circle.body.velocity.x = -200;
       }
       
-      if(circleJumping){
-        circleJumping = false;
-        game.input.onDown.add(prepareToJump, this);
+      if(circle.jumping){
+        circle.jumping = false;
+        game.input.onDown.add(circle.prepareToJump, circle);
       }
     }
     // else{
