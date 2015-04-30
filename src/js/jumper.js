@@ -8,16 +8,28 @@ window.onload = function() {
 
   var Player = function (game, playerSprite) {
 
-    Phaser.Sprite.call(this, game, game.width / 2 + 50, 300, playerSprite);
-
     this.game = game;
     this.jumping = false;
+    this.jumpready = false;
+    this.bmd = null;
+
+    this.jumpDistance = 0;
+    this.jumpHeight = 0;
+    this.jumpHeightStart = 0;
+    this.jumpReady = false;
+
+    this.HEIGHT_SENSITIVITY = 1.2;
+    this.POINT_DENSITY = 100;
+
+    Phaser.Sprite.call(this, game, game.width / 2 + 50, 300, playerSprite);
   };
 
   Player.prototype = Object.create(Phaser.Sprite.prototype, {
 
     prepareToJump: {
-      value: function () {
+      value: function (clickEvent) {
+        this.jumpready = true;
+        this.jumpHeightStart = clickEvent.clientX;
         this.game.input.onDown.remove(this.prepareToJump, this);
         this.game.input.onUp.add(this.jump, this);
       }
@@ -25,16 +37,54 @@ window.onload = function() {
 
     jump: {
       value: function () {
+        console.log(this.points);
+        var tween = this.game.add.tween(this);
+        tween.to({
+          x: this.points.x,
+          y: this.points.y
+        }, 1000);
+        tween.interpolation(Phaser.Math.bezierInterpolation);
+        tween.start();
         this.jumping = true;
-        this.body.velocity.x = 200;
+        this.jumpready = false;
+        // this.body.velocity.x = 200;
+        this.jumpDistance = 0;
+        this.jumpHeight = 0;
+        this.jumpHeightStart = 0;
+        this.jumpready = false;
         this.game.input.onUp.remove(this.jump, this);
+      }
+    },
+    plot: {
+      value: function (points) {
+        this.path = [];
+        this.points = points;
+
+        var x = 1 / this.POINT_DENSITY;
+
+        for (var i = 0; i <= 1; i += x)
+        {
+          var px = Phaser.Math.bezierInterpolation(points.x, i);
+          var py = Phaser.Math.bezierInterpolation(points.y, i);
+
+          this.path.push( { x: px, y: py });
+
+          this.bmd.rect(px, py, 1, 1, 'rgba(255, 255, 255, 1)');
+        }
+
+        for (var p = 0; p < points.x.length; p++)
+        {
+          this.bmd.rect(points.x[p]-3, points.y[p]-3, 6, 6, 'rgba(255, 0, 0, 1)');
+        }
       }
     }
   });
+
   Player.prototype.constructor = Player;
 
   var platforms;
   var circle;
+
 
   function preload () {
     game.load.image('circle', 'sprites/circle.png');
@@ -53,8 +103,10 @@ window.onload = function() {
     circle.body.bounce.x = 0.2;
     circle.body.gravity.x = -300;
     circle.body.collideWorldBounds = true;
+    circle.bmd = this.add.bitmapData(game.width, game.height);
 
     game.add.existing(circle);
+    circle.bmd.addToWorld();
 
     platforms = game.add.group();
     platforms.enableBody = true;
@@ -99,6 +151,20 @@ window.onload = function() {
 
   function update () {
     game.physics.arcade.collide(circle, platforms, checkLanding);
+    if (circle.jumpready === true) {
+      circle.jumpDistance += 2;
+      circle.jumpHeight = Math.abs(circle.jumpHeightStart - game.input.x) * circle.HEIGHT_SENSITIVITY;
+    }
+    var jumpPoints = {
+      'x': [ circle.x, circle.x + circle.jumpHeight, circle.x],
+      'y': [ circle.y, circle.y - circle.jumpDistance/2, circle.y - circle.jumpDistance]
+    };
+    // var mirrorJumpPoints = {
+    //   'x': [ circle.x, circle.x + circle.jumpHeight, circle.x],
+    //   'y': [ circle.y, circle.y + circle.jumpDistance/2, circle.y + circle.jumpDistance]
+    // };
+    // circle.plot(mirrorJumpPoints);
+    circle.plot(jumpPoints);
   }
 
 };
