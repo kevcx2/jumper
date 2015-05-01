@@ -11,7 +11,6 @@ window.onload = function() {
     this.game = game;
     this.jumping = false;
     this.jumpready = false;
-    this.bmd = null;
 
     this.jumpDistance = 0;
     this.jumpHeight = 0;
@@ -20,6 +19,8 @@ window.onload = function() {
 
     this.HEIGHT_SENSITIVITY = 1.2;
     this.POINT_DENSITY = 100;
+    this.lastCurve = undefined; // to hold graphics object of last drawn curve - will be reset every frame
+    this.lastCurveMirror = undefined;
 
     Phaser.Sprite.call(this, game, game.width / 2 + 50, 300, playerSprite);
   };
@@ -68,13 +69,6 @@ window.onload = function() {
           var py = Phaser.Math.bezierInterpolation(points.y, i);
 
           this.path.push( { x: px, y: py });
-
-          this.bmd.rect(px, py, 1, 1, 'rgba(255, 255, 255, 1)');
-        }
-
-        for (var p = 0; p < points.x.length; p++)
-        {
-          this.bmd.rect(points.x[p]-3, points.y[p]-3, 6, 6, 'rgba(255, 0, 0, 1)');
         }
       }
     }
@@ -103,10 +97,8 @@ window.onload = function() {
     circle.body.bounce.x = 0.2;
     circle.body.gravity.x = -300;
     circle.body.collideWorldBounds = true;
-    circle.bmd = this.add.bitmapData(game.width, game.height);
 
     game.add.existing(circle);
-    circle.bmd.addToWorld();
 
     platforms = game.add.group();
     platforms.enableBody = true;
@@ -134,7 +126,7 @@ window.onload = function() {
         circle.body.velocity.y = border * 2;
         circle.body.velocity.x = -200;
       }
-      
+
       if(circle.jumping){
         circle.jumping = false;
         game.input.onDown.add(circle.prepareToJump, circle);
@@ -150,6 +142,7 @@ window.onload = function() {
 
 
   function update () {
+
     game.physics.arcade.collide(circle, platforms, checkLanding);
     if (circle.jumpready === true) {
       circle.jumpDistance += 2;
@@ -165,6 +158,24 @@ window.onload = function() {
     // };
     // circle.plot(mirrorJumpPoints);
     circle.plot(jumpPoints);
+
+    if (circle.jumpready === true) {
+      if (circle.lastCurve) {
+        circle.lastCurve.destroy();
+        circle.lastCurveMirror.destroy();
+      }
+      //potential source of slowdown - revisit if performance is an issue
+      // building / destroying graphics objects is somewhat cpu intensive
+      var jumpPath = game.add.graphics(circle.x, circle.y);
+      jumpPath.lineStyle(2, 0x99FFCC, 1);
+      jumpPath.quadraticCurveTo(circle.jumpHeight, -circle.jumpDistance/2, 0, -circle.jumpDistance);
+      circle.lastCurve = jumpPath;
+
+      var jumpPathMirror = game.add.graphics(circle.x, circle.y);
+      jumpPathMirror.lineStyle(2, 0x99FFCC, 1);
+      jumpPathMirror.quadraticCurveTo(-circle.jumpHeight, -circle.jumpDistance/2, 0, -circle.jumpDistance);
+      circle.lastCurveMirror = jumpPathMirror;
+    }
   }
 
 };

@@ -13,7 +13,6 @@ var CurveTest = function () {
   this.jumpReady = false;
 
   this.HEIGHT_SENSITIVITY = 2;
-  this.POINT_DENSITY = 100;
 
   this.lastCurve = undefined;
 };
@@ -77,6 +76,5 @@ CurveTest.prototype = {
 };
 
 game.state.add('Game', CurveTest, true);
-
 
 };
