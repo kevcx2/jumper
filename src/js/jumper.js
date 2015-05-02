@@ -17,7 +17,11 @@ window.onload = function() {
     this.jumpHeightStart = 0;
     this.jumpReady = false;
 
-    this.HEIGHT_SENSITIVITY = 1.2;
+    this.jumpGuideStartSpeed = 2.8;
+    this.jumpGuideSpeed = this.jumpGuideStartSpeed;
+    this.jumpGuideAccel = 1.03;
+
+    this.HEIGHT_SENSITIVITY = 2;
     this.POINT_DENSITY = 100;
     this.lastCurve = undefined; // to hold graphics object of last drawn curve - will be reset every frame
     this.pointGraphics = [];
@@ -44,7 +48,7 @@ window.onload = function() {
         tween.to({
           x: this.points.x,
           y: this.points.y
-        }, 1000);
+        }, 800);
         tween.interpolation(Phaser.Math.bezierInterpolation);
         tween.start();
         this.jumping = true;
@@ -53,6 +57,7 @@ window.onload = function() {
         this.jumpDistance = 0;
         this.jumpHeight = 0;
         this.jumpHeightStart = 0;
+        this.jumpGuideSpeed = this.jumpGuideStartingSpeed;
         this.jumpready = false;
         this.game.input.onUp.remove(this.jump, this);
       }
@@ -74,13 +79,11 @@ window.onload = function() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
     circle = new Player(game, 'circle');
-    // circle = game.add.sprite(game.width / 2 + 50, 300, 'circle');
     circle.anchor.set(0.5);
     circle.enableBody = true;
     game.physics.arcade.enable(circle);
     circle.body.bounce.x = 0.2;
-    // circle.body.gravity.x = -300;
-    circle.body.collideWorldBounds = true;
+    // circle.body.collideWorldBounds = true;
 
     game.add.existing(circle);
 
@@ -100,7 +103,6 @@ window.onload = function() {
     // Set up handlers for mouse events
     game.input.onDown.add(circle.prepareToJump, circle);
     // game.input.addMoveCallback(mouseDragMove, this);
-
   }
 
   function checkLanding (circle, platform){
@@ -123,41 +125,43 @@ window.onload = function() {
 
     game.physics.arcade.collide(circle, platforms, checkLanding);
     if (circle.jumpready === true) {
-      circle.jumpDistance += 2;
+      circle.jumpGuideSpeed *= circle.jumpGuideAccel;
+      circle.jumpDistance += circle.jumpGuideSpeed;
       circle.jumpHeight = Math.abs(circle.jumpHeightStart - game.input.x) * circle.HEIGHT_SENSITIVITY;
     }
 
-    rect = game.add.graphics(circle.x, circle.y);
-    rect.lineStyle(1, 0x0000FF, 1);
-    rect.drawRect(1,1,1,1);
+    // trace jump path
+    // rect = game.add.graphics(circle.x, circle.y);
+    // rect.lineStyle(1, 0x0000FF, 1);
+    // rect.drawRect(1,1,1,1);
 
     circle.points = {
-      'x': [ circle.x, circle.x + circle.jumpHeight + (circle.jumpHeight * .01), circle.x],
+      'x': [ circle.x, circle.x + circle.jumpHeight + (circle.jumpHeight * 0.01), circle.x],
       'y': [ circle.y, (circle.y - circle.jumpDistance/2), circle.y - circle.jumpDistance]
     };
 
     if (circle.jumpready === true) {
       if (circle.lastCurve) {
         circle.lastCurve.destroy();
-        // circle.lastCurveMirror.destroy();
+        circle.lastCurveMirror.destroy();
       }
       circle.pointGraphics.forEach(function (graphic) {
         graphic.destroy();
       });
       circle.pointGraphics = [];
       var jumpPath = game.add.graphics(circle.x + 2, circle.y + 2);
-      jumpPath.lineStyle(2, 0x99FFCC, 1);
+      jumpPath.lineStyle(5, 0x99FFCC, 0.5);
       jumpPath.quadraticCurveTo(
-        circle.jumpHeight - (circle.jumpHeight * .09), -circle.jumpDistance/2, 0 - 2, -circle.jumpDistance - 2
+        circle.jumpHeight - (circle.jumpHeight * 0.09), -circle.jumpDistance/2 - 5, 0 - 2, -circle.jumpDistance - 2
       );
       circle.lastCurve = jumpPath;
 
-      // var jumpPathMirror = game.add.graphics(circle.x, circle.y);
-      // jumpPathMirror.lineStyle(2, 0x99FFCC, 1);
-      // jumpPathMirror.quadraticCurveTo(
-      //   -circle.jumpHeight + circle.height/2, -circle.jumpDistance/2, 0, -circle.jumpDistance
-      // );
-      // circle.lastCurveMirror = jumpPathMirror;
+      var jumpPathMirror = game.add.graphics(circle.x + 2, circle.y + 2);
+      jumpPathMirror.lineStyle(5, 0x99FFCC, 0.5);
+      jumpPathMirror.quadraticCurveTo(
+        -(circle.jumpHeight - (circle.jumpHeight * 0.09)), -circle.jumpDistance/2 - 5, 0 - 2, -circle.jumpDistance - 2
+      );
+      circle.lastCurveMirror = jumpPathMirror;
     }
   }
 
