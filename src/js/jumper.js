@@ -12,8 +12,10 @@ window.onload = function() {
   var score;
   var addPlats = false;
   var topPlat = 0;
-  var platDist = -200;
-  var platDistRange = -125;
+  var platDist = -125;
+  var platDistRange = -200;
+  var playerOnCameraY = 5/6;
+  var debug = false;
 
   function preload () {
     game.load.image('circle', 'sprites/circle.png');
@@ -74,7 +76,7 @@ window.onload = function() {
 
 
   function update () {
-    game.camera.y = circle.y - (game.height * (3/4)) + (circle.height / 2);
+    game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
     if (!circle.jumping) {
       console.log(checkLanding(circle, platforms));
     }
@@ -98,8 +100,10 @@ window.onload = function() {
 
   function render () {
     //debug render info
-    // game.debug.cameraInfo(game.camera, 32, 32);
-    // game.debug.spriteCoords(circle, 32, game.height - 100);
+    if (debug) {
+      game.debug.cameraInfo(game.camera, 32, 32);
+      game.debug.spriteCoords(circle, 32, game.height - 100);
+    }
   }
 
 };

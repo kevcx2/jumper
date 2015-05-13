@@ -21,12 +21,10 @@ var Player = function (game, playerSprite) {
   //jump path
   this.HEIGHT_SENSITIVITY = 2;
   this.POINT_DENSITY = 100;
-  this.pointGraphics = [];
 
-  //create sprite, set intitil event handler
+  //create sprite, set intitial event handler
   Phaser.Sprite.call(this, game, game.width / 2, 0, playerSprite);
   this.mirror = this.game.add.sprite(game.width / 2, 0, playerSprite);
-
   this.anchor.set(0.5);
   this.mirror.anchor.set(0.5);
 
@@ -70,6 +68,7 @@ Player.prototype = Object.create(Phaser.Sprite.prototype, {
       this.jumpGuideSpeed = this.jumpGuideStartSpeed;
       this.jumpready = false;
       this.game.input.onUp.remove(this.jump, this);
+      this.fadeTrail();
     }
   },
 
@@ -78,8 +77,6 @@ Player.prototype = Object.create(Phaser.Sprite.prototype, {
       // console.log('landed');
 
       this.jumping = false;
-      this.fadeTrail();
-
       this.score += 1;
       this.game.input.onDown.add(this.prepareToJump, this);
     }
@@ -95,13 +92,13 @@ Player.prototype = Object.create(Phaser.Sprite.prototype, {
       this.lastCurveMirror = undefined;
 
       fade = this.game.add.tween(oldCurve);
-      fade.to({ alpha: 0 }, 250);
+      fade.to({ alpha: 0 }, 500);
       fade.onComplete.add(function () {
         oldCurve.destroy();
       });
 
       fadeMirror = this.game.add.tween(oldCurveMirror);
-      fadeMirror.to({ alpha: 0 }, 250);
+      fadeMirror.to({ alpha: 0 }, 500);
       fadeMirror.onComplete.add(function () {
         oldCurveMirror.destroy();
       });
@@ -122,6 +119,26 @@ Player.prototype = Object.create(Phaser.Sprite.prototype, {
       tween.start();
 
       return tween;
+    }
+  },
+
+  drawGuide: {
+    value: function (height, distance) {
+      //contains magic numbers for adjusting drawn curve to match the path it follows - revisit
+
+      var jumpPath = this.game.add.graphics(this.x + 2, this.y + 2);
+      jumpPath.lineStyle(5, 0x99FFCC, 0.5);
+      jumpPath.quadraticCurveTo(
+        height - (height * 0.09), -distance/2 - 5, 0 - 2, -distance - 2
+      );
+      this.lastCurve = jumpPath;
+
+      var jumpPathMirror = this.game.add.graphics(this.x + 2, this.y + 2);
+      jumpPathMirror.lineStyle(5, 0x99FFCC, 0.5);
+      jumpPathMirror.quadraticCurveTo(
+       -(height - (height * 0.09)), -distance/2 - 5, 0 - 2, -distance - 2
+      );
+      this.lastCurveMirror = jumpPathMirror;
     }
   },
 
@@ -169,25 +186,9 @@ Player.prototype.update = function () {
       this.lastCurve.destroy();
       this.lastCurveMirror.destroy();
     }
-    this.pointGraphics.forEach(function (graphic) {
-      graphic.destroy();
-    });
-    this.pointGraphics = [];
 
     //draw guide curve
-    var jumpPath = this.game.add.graphics(this.x + 2, this.y + 2);
-    jumpPath.lineStyle(5, 0x99FFCC, 0.5);
-    jumpPath.quadraticCurveTo(
-      this.jumpHeight - (this.jumpHeight * 0.09), -this.jumpDistance/2 - 5, 0 - 2, -this.jumpDistance - 2
-    );
-    this.lastCurve = jumpPath;
+    this.drawGuide(this.jumpHeight, this.jumpDistance);
 
-    //draw guide curve mirror
-    var jumpPathMirror = this.game.add.graphics(this.x + 2, this.y + 2);
-    jumpPathMirror.lineStyle(5, 0x99FFCC, 0.5);
-    jumpPathMirror.quadraticCurveTo(
-      -(this.jumpHeight - (this.jumpHeight * 0.09)), -this.jumpDistance/2 - 5, 0 - 2, -this.jumpDistance - 2
-    );
-    this.lastCurveMirror = jumpPathMirror;
   }
 };
