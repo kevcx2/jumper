@@ -15,7 +15,7 @@ window.onload = function() {
   var platDist = -60;
   var platDistRange = -200;
   var playerOnCameraY = 5/6;
-  var debug = true;
+  var debug = false;
 
   function preload () {
     game.load.image('circle', 'sprites/circle.png');
@@ -59,7 +59,6 @@ window.onload = function() {
   }
 
   function addPlatforms(num, x, y) {
-    //create 10 platforms
     for(var i = 0; i < num; i++) {
       topPlat = topPlat + platDist + (Math.random() * platDistRange);
       var ledge = platforms.create(x, y || topPlat, 'square');
@@ -89,7 +88,6 @@ window.onload = function() {
     score.y = game.camera.y;
 
     //add new platforms
-    //note: old platforms are not currently being destroyed
     if ((circle.score % 10 === 0) && (addPlats === true)) {
       console.log('add plats');
       addPlatforms(10, game.width / 2);
