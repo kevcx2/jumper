@@ -67,6 +67,14 @@ window.onload = function() {
     }
   }
 
+  function deletePlatforms () {
+    platforms.forEach( function (platform) {
+      if (platform.y > game.camera.y + game.height) {
+        platforms.remove(platform, true);
+      }
+    }, this);
+  }
+
 
   function update () {
     game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
@@ -89,6 +97,7 @@ window.onload = function() {
     else if (circle.score % 10 === 1) {
       addPlats = true;
     }
+    deletePlatforms();
   }
 
   function render () {
