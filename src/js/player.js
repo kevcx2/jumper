@@ -1,4 +1,5 @@
 var Player = function (game, playerSprite) {
+
   //states
   this.game = game;
   this.jumping = false;
@@ -16,18 +17,19 @@ var Player = function (game, playerSprite) {
   this.jumpGuideStartSpeed = 2.8;
   this.jumpGuideSpeed = this.jumpGuideStartSpeed;
   this.jumpGuideAccel = 1.03;
-  this.lastCurve = undefined; // to hold graphics object of last drawn curve - will be reset every frame
+  // to hold graphics object of last drawn curve - will be reset every frame
+  this.lastCurve = undefined;
 
   //jump path
   this.HEIGHT_SENSITIVITY = 2;
-  this.POINT_DENSITY = 100;
 
-  //create sprite, set intitial event handler
+  //create sprites
   Phaser.Sprite.call(this, game, game.width / 2, 0, playerSprite);
   this.mirror = this.game.add.sprite(game.width / 2, 0, playerSprite);
   this.anchor.set(0.5);
   this.mirror.anchor.set(0.5);
 
+  //set intital event handler
   this.game.input.onDown.add(this.prepareToJump, this);
 };
 
