@@ -60,8 +60,8 @@ window.onload = function() {
   function addPlatforms(num, x, y) {
     //create 10 platforms
     for(var i = 0; i < num; i++) {
-      topPlat = y || topPlat + platDist + (Math.random() * platDistRange);
-      var ledge = platforms.create(x, topPlat, 'square');
+      topPlat = topPlat + platDist + (Math.random() * platDistRange);
+      var ledge = platforms.create(x, y || topPlat, 'square');
       ledge.anchor.set(0.5, 0.5);
       game.physics.arcade.enable(ledge);
     }
@@ -83,7 +83,7 @@ window.onload = function() {
     //note: old platforms are not currently being destroyed
     if ((circle.score % 10 === 0) && (addPlats === true)) {
       console.log('add plats');
-      addPlatforms(10);
+      addPlatforms(10, game.width / 2);
       addPlats = false;
     }
     else if (circle.score % 10 === 1) {
