@@ -48,11 +48,11 @@ window.onload = function() {
   function checkLanding (circle, platforms){
     if (!circle.jumping) {
       var jumpStatus = false;
-      for(var i = 0; i < platforms.length; i++) {
-        if (Phaser.Rectangle.intersects(circle.body, platforms.children[i].body)) {
+      platforms.forEach( function (platform) {
+        if (Phaser.Rectangle.intersects(circle.body, platform.body)) {
           jumpStatus = true;
         }
-      }
+      });
       return jumpStatus;
     }
     return true;
