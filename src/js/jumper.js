@@ -15,12 +15,13 @@ window.onload = function() {
   var platDist = -60;
   var platDistRange = -200;
   var playerOnCameraY = 5/6;
-  var debug = false;
+  var debug = true;
 
   function preload () {
     game.load.image('circle', 'sprites/circle.png');
     game.load.image('square', 'sprites/square.png');
     game.load.image('triangle', 'sprites/triangle.png');
+    game.load.image('particle', 'sprites/particle.png');
     game.camera.bounds = null;
   }
 

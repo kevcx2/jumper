@@ -31,9 +31,27 @@ var Player = function (game, playerSprite) {
 
   //set intital event handler
   this.game.input.onDown.add(this.prepareToJump, this);
+
+  //set up particle emitter on player object & mirror
+  this.particleDensity = 100;
+  this.emitter = this.createParticleEmitter();
+  this.mirrorEmitter = this.createParticleEmitter();
 };
 
 Player.prototype = Object.create(Phaser.Sprite.prototype, {
+
+  createParticleEmitter: {
+    value: function () {
+      emitter = this.game.add.emitter(0, 0, this.particleDensity);
+      emitter.makeParticles('particle');
+
+      emitter.setRotation(0, 0);
+      emitter.lifespan = 500;
+      // emitter.start(false, 5000, 100);
+
+      return emitter;
+    }
+  },
 
   prepareToJump: {
     value: function (clickEvent) {
@@ -144,6 +162,20 @@ Player.prototype = Object.create(Phaser.Sprite.prototype, {
     }
   },
 
+  updateEmitters: {
+    value: function () {
+      this.emitter.x = this.x;
+      this.emitter.y = this.y;
+      this.mirrorEmitter.x = this.mirror.x;
+      this.mirrorEmitter.y = this.mirror.y;
+
+      if (this.jumping === true) {
+        this.emitter.emitParticle();
+        this.mirrorEmitter.emitParticle();
+      }
+    }
+  },
+
   debugPrint: {
     value: function () {
       console.log('jumping: ' + this.jumping);
@@ -163,6 +195,9 @@ Player.prototype = Object.create(Phaser.Sprite.prototype, {
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function () {
+
+  //update location of particle emitter to follow player & emit
+  this.updateEmitters();
 
   //update jumpHeight based on an accelerating guide curve
   if (this.jumpready === true) {
@@ -191,6 +226,5 @@ Player.prototype.update = function () {
 
     //draw guide curve
     this.drawGuide(this.jumpHeight, this.jumpDistance);
-
   }
 };
