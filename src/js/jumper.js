@@ -12,7 +12,7 @@ window.onload = function() {
   var score;
   var addPlats = false;
   var topPlat = 0;
-  var platDist = -125;
+  var platDist = -60;
   var platDistRange = -200;
   var playerOnCameraY = 5/6;
   var debug = false;
@@ -34,17 +34,10 @@ window.onload = function() {
     platforms = game.add.group();
 
     //create starting platform
-    var ledge = platforms.create(circle.x - 3, circle.y - 3, 'square');
-    ledge.anchor.set(0.5, 0.5);
-    game.physics.arcade.enable(ledge);
+    addPlatforms(1, circle.x - 3, circle.y - 3);
 
     //create 20 platforms
-    for(var i = 0; i < 20; i++) {
-      topPlat = topPlat + platDist + (Math.random() * platDistRange);
-      ledge = platforms.create(game.width / 2, topPlat, 'square');
-      ledge.anchor.set(0.5, 0.5);
-      game.physics.arcade.enable(ledge);
-    }
+    addPlatforms(20, game.width / 2);
 
     score = game.add.text(0, 0, "Score: " + circle.score,
       { font: "18px Arial", fill: "#fff", align: "left" }
@@ -64,11 +57,11 @@ window.onload = function() {
     return true;
   }
 
-  function addPlatforms() {
+  function addPlatforms(num, x, y) {
     //create 10 platforms
-    for(var i = 0; i < 10; i++) {
-      topPlat = topPlat + platDist + (Math.random() * platDistRange);
-      ledge = platforms.create(game.width / 2, topPlat, 'square');
+    for(var i = 0; i < num; i++) {
+      topPlat = y || topPlat + platDist + (Math.random() * platDistRange);
+      var ledge = platforms.create(x, topPlat, 'square');
       ledge.anchor.set(0.5, 0.5);
       game.physics.arcade.enable(ledge);
     }
@@ -90,7 +83,7 @@ window.onload = function() {
     //note: old platforms are not currently being destroyed
     if ((circle.score % 10 === 0) && (addPlats === true)) {
       console.log('add plats');
-      addPlatforms();
+      addPlatforms(10);
       addPlats = false;
     }
     else if (circle.score % 10 === 1) {
