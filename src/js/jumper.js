@@ -15,7 +15,7 @@ window.onload = function() {
   var platDist = -60;
   var platDistRange = -200;
   var playerOnCameraY = 5/6;
-  var debug = true;
+  var debug = false;
 
   function preload () {
     game.load.image('circle', 'sprites/circle.png');
@@ -46,20 +46,18 @@ window.onload = function() {
   }
 
   function checkLanding (circle, platforms){
-    if (!circle.jumping) {
-      var jumpStatus = false;
-      for(var i = 0; i < platforms.length; i++) {
-        if (Phaser.Rectangle.intersects(circle.body, platforms.children[i].body)) {
-          jumpStatus = true;
-        }
+    circle.landed = false;
+    var jumpStatus = false;
+    platforms.forEach( function (platform) {
+      if (Phaser.Rectangle.intersects(circle.body, platform.body)) {
+        shrinkPlatform(platform);
+        jumpStatus = true;
       }
-      return jumpStatus;
-    }
-    return true;
+    });
+    return jumpStatus;
   }
 
   function addPlatforms(num, x, y) {
-    //create 10 platforms
     for(var i = 0; i < num; i++) {
       topPlat = topPlat + platDist + (Math.random() * platDistRange);
       var ledge = platforms.create(x, y || topPlat, 'square');
@@ -87,9 +85,15 @@ window.onload = function() {
     circle.score = 0;
   }
 
+  function shrinkPlatform (platform) {
+    var shrink = game.add.tween(platform);
+    shrink.to({ alpha: 0 }, 2000);
+    shrink.start();
+  }
+
   function update () {
     game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
-    if (!circle.jumping) {
+    if (circle.landed) {
       console.log(checkLanding(circle, platforms));
       if (!checkLanding(circle, platforms)) {
         resetGame();

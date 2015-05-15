@@ -4,6 +4,7 @@ var Player = function (game, playerSprite) {
   this.game = game;
   this.jumping = false;
   this.jumpready = false;
+  this.landed = false;
 
   //score
   this.score = 0;
@@ -97,6 +98,7 @@ Player.prototype = Object.create(Phaser.Sprite.prototype, {
       // console.log('landed');
 
       this.jumping = false;
+      this.landed = true;
       this.score += 1;
       this.game.input.onDown.add(this.prepareToJump, this);
     }
