@@ -46,16 +46,15 @@ window.onload = function() {
   }
 
   function checkLanding (circle, platforms){
-    if (!circle.jumping) {
-      var jumpStatus = false;
-      platforms.forEach( function (platform) {
-        if (Phaser.Rectangle.intersects(circle.body, platform.body)) {
-          jumpStatus = true;
-        }
-      });
-      return jumpStatus;
-    }
-    return true;
+    circle.landed = false;
+    var jumpStatus = false;
+    platforms.forEach( function (platform) {
+      if (Phaser.Rectangle.intersects(circle.body, platform.body)) {
+        shrinkPlatform(platform);
+        jumpStatus = true;
+      }
+    });
+    return jumpStatus;
   }
 
   function addPlatforms(num, x, y) {
@@ -75,10 +74,16 @@ window.onload = function() {
     }, this);
   }
 
+  function shrinkPlatform (platform) {
+    var shrink = game.add.tween(platform);
+    shrink.to({ alpha: 0 }, 2000);
+    shrink.start();
+  }
+
 
   function update () {
     game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
-    if (!circle.jumping) {
+    if (circle.landed) {
       console.log(checkLanding(circle, platforms));
     }
 
