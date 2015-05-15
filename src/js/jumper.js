@@ -76,11 +76,24 @@ window.onload = function() {
     }, this);
   }
 
+  function resetGame() {
+    game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
+    deletePlatforms();
+    addPlatforms(20, game.width / 2);
+
+    circle.y = platforms.children[0].y;
+    circle.mirror.y = platforms.children[0].y;
+    game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
+    circle.score = 0;
+  }
 
   function update () {
     game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
     if (!circle.jumping) {
       console.log(checkLanding(circle, platforms));
+      if (!checkLanding(circle, platforms)) {
+        resetGame();
+      }
     }
 
     //update score
@@ -89,7 +102,6 @@ window.onload = function() {
     score.y = game.camera.y;
 
     //add new platforms
-    //note: old platforms are not currently being destroyed
     if ((circle.score % 10 === 0) && (addPlats === true)) {
       console.log('add plats');
       addPlatforms(10, game.width / 2);

@@ -149,12 +149,12 @@ window.onload = function() {
 	Pole.prototype = Object.create(Phaser.Sprite.prototype);
 	Pole.prototype.constructor = Pole;
 	Pole.prototype.update = function() {
-          if(ninjaJumping && !ninjaFallingDown){
-               this.body.velocity.x = ninjaJumpPower;
-          }
-          else{
-               this.body.velocity.x = 0
-          }
+    if(ninjaJumping && !ninjaFallingDown){
+         this.body.velocity.x = ninjaJumpPower;
+    }
+    else{
+         this.body.velocity.x = 0
+    }
 		if(this.x<-this.width){
 			this.destroy();
 			addNewPoles();
