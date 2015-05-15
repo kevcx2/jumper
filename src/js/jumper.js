@@ -50,8 +50,8 @@ window.onload = function() {
     var jumpStatus = false;
     platforms.forEach( function (platform) {
       if (Phaser.Rectangle.intersects(circle.body, platform.body)) {
-        shrinkPlatform(platform);
         jumpStatus = true;
+        shrinkPlatform(platform);
       }
     });
     return jumpStatus;
@@ -78,9 +78,8 @@ window.onload = function() {
     game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
     deletePlatforms();
     addPlatforms(20, game.width / 2);
-
-    circle.y = platforms.children[0].y;
-    circle.mirror.y = platforms.children[0].y;
+    circle.y = platforms.getFirstAlive().y;
+    circle.mirror.y = platforms.getFirstAlive().y;
     game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
     circle.score = 0;
   }
@@ -89,12 +88,15 @@ window.onload = function() {
     var shrink = game.add.tween(platform);
     shrink.to({ alpha: 0 }, 2000);
     shrink.start();
+    platform.alive = false;
+    shrink.onComplete.add(function (plat) {
+      plat.destroy();
+    });
   }
 
   function update () {
     game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
     if (circle.landed) {
-      console.log(checkLanding(circle, platforms));
       if (!checkLanding(circle, platforms)) {
         resetGame();
       }
