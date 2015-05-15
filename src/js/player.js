@@ -3,7 +3,7 @@ var Player = function (game, playerSprite) {
   //states
   this.game = game;
   this.jumping = false;
-  this.jumpready = false;
+  this.jumpReady = false;
   this.landed = false;
 
   //score
@@ -59,7 +59,7 @@ Player.prototype = Object.create(Phaser.Sprite.prototype, {
       // console.log('jumpprep');
       // this.debugPrint();
 
-      this.jumpready = true;
+      this.jumpReady = true;
       this.jumpHeightStart = clickEvent.clientX;
 
       this.game.input.onDown.remove(this.prepareToJump, this);
@@ -81,13 +81,12 @@ Player.prototype = Object.create(Phaser.Sprite.prototype, {
       tween.onComplete.add(this.land, this);
 
       this.jumping = true;
-      this.jumpready = false;
+      this.jumpReady = false;
 
       this.jumpDistance = 0;
       this.jumpHeight = 0;
       this.jumpHeightStart = 0;
       this.jumpGuideSpeed = this.jumpGuideStartSpeed;
-      this.jumpready = false;
       this.game.input.onUp.remove(this.jump, this);
       this.fadeTrail();
     }
@@ -178,10 +177,30 @@ Player.prototype = Object.create(Phaser.Sprite.prototype, {
     }
   },
 
+  resetState: {
+    value: function (newY) {
+      this.y = newY;
+      this.mirror.y = newY;
+      this.score = 0;
+
+      if (this.jumpReady) {
+        this.jumpReady = false;
+        this.jumpDistance = 0;
+        this.jumpHeight = 0;
+        this.jumpHeightStart = 0;
+        this.jumpGuideSpeed = this.jumpGuideStartSpeed;
+        this.fadeTrail();
+
+        this.game.input.onUp.remove(this.jump, this);
+        this.game.input.onDown.add(this.prepareToJump, this);
+      }
+    }
+  },
+
   debugPrint: {
     value: function () {
       console.log('jumping: ' + this.jumping);
-      console.log('jumpready ' + this.jumpready);
+      console.log('jumpReady ' + this.jumpReady);
 
       //jump attrs
       console.log('jumpDist ' + this.jumpDistance);
@@ -202,7 +221,7 @@ Player.prototype.update = function () {
   this.updateEmitters();
 
   //update jumpHeight based on an accelerating guide curve
-  if (this.jumpready === true) {
+  if (this.jumpReady === true) {
     this.jumpGuideSpeed *= this.jumpGuideAccel;
     this.jumpDistance += this.jumpGuideSpeed;
     this.jumpHeight = Math.abs(this.jumpHeightStart - this.game.input.x) * this.HEIGHT_SENSITIVITY;
@@ -220,7 +239,7 @@ Player.prototype.update = function () {
   };
 
   //redraw guide curve
-  if (this.jumpready === true) {
+  if (this.jumpReady === true) {
     if (this.lastCurve) {
       this.lastCurve.destroy();
       this.lastCurveMirror.destroy();

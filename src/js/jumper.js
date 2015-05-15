@@ -12,10 +12,10 @@ window.onload = function() {
   var score;
   var addPlats = false;
   var topPlat = 0;
-  var platDist = -60;
+  var platDist = -80;
   var platDistRange = -200;
   var playerOnCameraY = 5/6;
-  var debug = false;
+  var debug = true;
 
   function preload () {
     game.load.image('circle', 'sprites/circle.png');
@@ -35,7 +35,7 @@ window.onload = function() {
     platforms = game.add.group();
 
     //create starting platform
-    addPlatforms(1, circle.x - 3, circle.y - 3);
+    addPlatforms(1, circle.x, circle.y);
 
     //create 20 platforms
     addPlatforms(20, game.width / 2);
@@ -52,6 +52,9 @@ window.onload = function() {
       if (Phaser.Rectangle.intersects(circle.body, platform.body)) {
         jumpStatus = true;
         shrinkPlatform(platform);
+      }
+      else if (circle.y < platform.y) {
+        platform.alive = false;
       }
     });
     return jumpStatus;
@@ -77,11 +80,11 @@ window.onload = function() {
   function resetGame() {
     game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
     deletePlatforms();
+    //did we fix problem of adding unneccesary platforms?
     addPlatforms(20, game.width / 2);
-    circle.y = platforms.getFirstAlive().y;
-    circle.mirror.y = platforms.getFirstAlive().y;
+    circle.resetState(platforms.getFirstAlive().y);
     game.camera.y = circle.y - (game.height * playerOnCameraY) + (circle.height / 2);
-    circle.score = 0;
+
   }
 
   function shrinkPlatform (platform) {
@@ -89,9 +92,14 @@ window.onload = function() {
     shrink.to({ alpha: 0 }, 2000);
     shrink.start();
     platform.alive = false;
+    currY = circle.y;
+
     shrink.onComplete.add(function (plat) {
+      if (circle.y > plat.y - plat.height / 2) {
+        resetGame();
+      }
       plat.destroy();
-    });
+    }, this);
   }
 
   function update () {
