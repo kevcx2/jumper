@@ -5,6 +5,7 @@ var Player = function (game, playerSprite) {
   this.jumping = false;
   this.jumpReady = false;
   this.landed = false;
+  this.target = false; // used for making sure target is collected each jump
 
   //score
   this.score = 0;
@@ -35,16 +36,19 @@ var Player = function (game, playerSprite) {
 
   //set up particle emitter on player object & mirror
   this.particleDensity = 100;
-  this.emitter = this.createParticleEmitter();
-  this.mirrorEmitter = this.createParticleEmitter();
+  this.emitter = this.createParticleEmitter('particle');
+  this.mirrorEmitter = this.createParticleEmitter('particle');
+
+  this.burstEmitter = this.createParticleEmitter('burst');
+  this.mirrorBurstEmitter = this.createParticleEmitter('burst');
 };
 
 Player.prototype = Object.create(Phaser.Sprite.prototype, {
 
   createParticleEmitter: {
-    value: function () {
+    value: function (key) {
       emitter = this.game.add.emitter(0, 0, this.particleDensity);
-      emitter.makeParticles('particle');
+      emitter.makeParticles(key);
 
       emitter.setRotation(0, 0);
       emitter.lifespan = 500;
@@ -163,24 +167,39 @@ Player.prototype = Object.create(Phaser.Sprite.prototype, {
     }
   },
 
-  updateEmitters: {
-    value: function () {
-      this.emitter.x = this.x;
-      this.emitter.y = this.y;
-      this.mirrorEmitter.x = this.mirror.x;
-      this.mirrorEmitter.y = this.mirror.y;
+  updateEmitter: {
+    value: function (emitter, mirror) {
+      if (mirror) {
+        emitter.x = this.mirror.x;
+        emitter.y = this.mirror.y;
+      }
+      else {
+        emitter.x = this.x;
+        emitter.y = this.y;
+      }
 
       if (this.jumping === true) {
-        this.emitter.emitParticle();
-        this.mirrorEmitter.emitParticle();
+        emitter.emitParticle();
+      }
+    }
+  },
+
+  burst: { //burst out effect when a target is collected
+    value: function () {
+      this.burstEmitter.x = this.x;
+      this.burstEmitter.y = this.y;
+      this.mirrorBurstEmitter.x = this.mirror.x;
+      this.mirrorBurstEmitter.y = this.mirror.y;
+
+      for(var i = 0; i < 3; i++) {
+        this.burstEmitter.emitParticle();
+        this.mirrorBurstEmitter.emitParticle();
       }
     }
   },
 
   resetState: {
-    value: function (newY) {
-      this.y = newY;
-      this.mirror.y = newY;
+    value: function () {
       this.score = 0;
 
       if (this.jumpReady) {
@@ -218,7 +237,8 @@ Player.prototype.constructor = Player;
 Player.prototype.update = function () {
 
   //update location of particle emitter to follow player & emit
-  this.updateEmitters();
+  this.updateEmitter(this.emitter, false);
+  this.updateEmitter(this.mirrorEmitter, true);
 
   //update jumpHeight based on an accelerating guide curve
   if (this.jumpReady === true) {
