@@ -22,11 +22,11 @@ window.onload = function() {
   var debug = true;
 
   function preload () {
-    game.load.image('circle', 'sprites/circle.png');
-    game.load.image('square', 'sprites/square.png');
-    game.load.image('triangle', 'sprites/triangle.png');
-    game.load.image('particle', 'sprites/particle.png');
-    game.load.image('burst', 'sprites/burst.png');
+    game.load.image('circle', '../sprites/circle.png');
+    game.load.image('square', '../sprites/square.png');
+    game.load.image('triangle', '../sprites/triangle.png');
+    game.load.image('particle', '../sprites/particle.png');
+    game.load.image('burst', '../sprites/burst.png');
     game.camera.bounds = null;
   }
 
