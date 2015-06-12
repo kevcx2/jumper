@@ -19,7 +19,7 @@ window.onload = function() {
   var platDist = -40;
   var platDistRange = -100;
   var playerOnCameraY = 5/6;
-  var debug = true;
+  var debug = false;
 
   function preload () {
     game.load.image('circle', 'src/sprites/circle.png');
@@ -185,6 +185,7 @@ window.onload = function() {
     updatePlats();
     deletePlats();
     deleteTargets();
+
     // console.log('num platforms: ' + platforms.children.length);
     // console.log('num targets: ' + targets.children.length);
   }
