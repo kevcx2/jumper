@@ -19,7 +19,7 @@ window.onload = function() {
   var platDist = -40;
   var platDistRange = -100;
   var playerOnCameraY = 5/6;
-  var debug = false;
+  var debug = true;
 
   function preload () {
     game.load.image('circle', 'src/sprites/circle.png');
